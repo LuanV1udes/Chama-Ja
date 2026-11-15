@@ -118,6 +118,48 @@ class MigracaoPostgresTest {
                 .isZero();
     }
 
+    /**
+     * O banco de produção já tem promoções cadastradas. A V4 não pode perdê-las, e passa a aceitar promoção sem
+     * preço (quando há banner) e a apagar o banner junto com a promoção.
+     */
+    @Test
+    void aV4MantemAsPromocoesExistentesETornaOPrecoOpcional() {
+        jdbc.execute("create database promos");
+        var banco = new DriverManagerDataSource(POSTGRES.getJdbcUrl("postgres", "promos"), "postgres", "postgres");
+        Flyway.configure().dataSource(banco).schemas("chamaja").defaultSchema("chamaja")
+                .createSchemas(true).target("3").load().migrate();
+
+        var promos = new JdbcTemplate(banco);
+        promos.update("insert into chamaja.estabelecimento (nome, codigo_qr, codigo_tela, estado_fila, senha_atual, ultimo_numero) "
+                + "values ('Loja', 'lojap', 'tela-lojap', 'ABERTA', 0, 0)");
+        Long estId = promos.queryForObject("select id from chamaja.estabelecimento", Long.class);
+        promos.update("insert into chamaja.promocao (estabelecimento_id, titulo, descricao, preco, validade, ativa) "
+                + "values (?, 'Leite', 'Integral', 4.99, '2030-01-01', true)", estId);
+
+        Flyway.configure().dataSource(banco).schemas("chamaja").defaultSchema("chamaja").load().migrate();
+
+        // A promoção antiga continua igual e sem banner.
+        assertThat(promos.queryForObject("select preco from chamaja.promocao where titulo = 'Leite'", java.math.BigDecimal.class))
+                .isEqualByComparingTo("4.99");
+        assertThat(promos.queryForObject("select imagem_versao from chamaja.promocao where titulo = 'Leite'", Long.class)).isNull();
+
+        // Promoção só com banner: sem preço.
+        promos.update("insert into chamaja.promocao (estabelecimento_id, titulo, preco, validade, ativa, imagem_versao, imagem_largura, imagem_altura) "
+                + "values (?, 'Encarte', null, '2030-01-01', true, 1, 1000, 525)", estId);
+        Long idEncarte = promos.queryForObject("select id from chamaja.promocao where titulo = 'Encarte'", Long.class);
+        promos.update("insert into chamaja.promocao_imagem (promocao_id, dados, tamanho, atualizada_em) values (?, ?, 3, now())",
+                idEncarte, new byte[]{1, 2, 3});
+
+        Boolean rls = promos.queryForObject("""
+                select c.relrowsecurity from pg_class c join pg_namespace n on n.oid = c.relnamespace
+                where n.nspname = 'chamaja' and c.relname = 'promocao_imagem'
+                """, Boolean.class);
+        assertThat(rls).isTrue();
+
+        promos.update("delete from chamaja.promocao where id = ?", idEncarte);
+        assertThat(promos.queryForObject("select count(*) from chamaja.promocao_imagem", Integer.class)).isZero();
+    }
+
     @Test
     void oEstabelecimentoDoSeedTemCodigoDaTela() {
         String codigoTela = jdbc.queryForObject(

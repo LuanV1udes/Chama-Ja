@@ -53,6 +53,21 @@ não sirva para pegar senha de casa.
 
 ---
 
+## Banners das promoções
+
+Se o mercado já tem o banner pronto, o operador o envia no formulário da promoção (**Promoções → Nova promoção**):
+o cliente vê **só a imagem**. Sem banner, aparece o cartão padrão do sistema (título, descrição e preço).
+
+- **Formato:** JPG ou PNG, até 3 MB. Banners retangulares (por exemplo, 1200 × 630) funcionam melhor.
+- **Com banner**, preço e descrição são opcionais; **sem banner**, o preço é obrigatório.
+- **Segurança:** o arquivo nunca é guardado como veio. O sistema confere o conteúdo real (não o nome), limita as
+  dimensões (evita imagens que travariam o servidor), reduz para no máximo 1000 pixels, regrava como JPEG e descarta
+  os metadados. Arquivos que não são imagem (HTML, SVG, PDF, executáveis...) são recusados.
+- **Onde fica:** no banco (tabela `promocao_imagem`, cerca de 100 a 300 KB por banner), não no disco da Railway,
+  que é apagado a cada deploy. O banner só é entregue ao cliente enquanto a promoção está ativa e dentro da validade.
+
+---
+
 ## Avisos no celular (Web Push)
 
 Depois de pegar a senha, o cliente vê uma mensagem animada ("Quer ser avisado?") e, se tocar em **Permitir

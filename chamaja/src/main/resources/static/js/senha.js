@@ -43,6 +43,20 @@
     promocoes.forEach(function (p) {
       var item = document.createElement('li');
 
+      // Banner pronto do mercado: aparece sozinho, no lugar do cartão padrão.
+      if (p.imagem) {
+        item.className = 'promo-banner';
+        var foto = document.createElement('img');
+        foto.src = p.imagem;
+        foto.alt = p.titulo;
+        foto.loading = 'lazy';
+        foto.decoding = 'async';
+        if (p.largura && p.altura) { foto.width = p.largura; foto.height = p.altura; }  // evita a página "pular"
+        item.appendChild(foto);
+        lista.appendChild(item);
+        return;
+      }
+
       var texto = document.createElement('div');
       texto.className = 'promo-txt';
       var titulo = document.createElement('strong');
@@ -60,10 +74,12 @@
       texto.appendChild(validade);
       item.appendChild(texto);
 
-      var preco = document.createElement('span');
-      preco.className = 'preco';
-      preco.textContent = p.preco;
-      item.appendChild(preco);
+      if (p.preco) {
+        var preco = document.createElement('span');
+        preco.className = 'preco';
+        preco.textContent = p.preco;
+        item.appendChild(preco);
+      }
 
       lista.appendChild(item);
     });

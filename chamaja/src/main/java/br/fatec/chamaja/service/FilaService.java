@@ -173,8 +173,11 @@ public class FilaService {
                 .map((Promocao p) -> new PromocaoView(
                         p.getTitulo(),
                         p.getDescricao() == null ? "" : p.getDescricao(),
-                        moeda.format(p.getPreco()),
-                        p.getValidade().format(DATA)))
+                        p.getPreco() == null ? null : moeda.format(p.getPreco()),
+                        p.getValidade().format(DATA),
+                        p.temImagem() ? "/promocoes/" + p.getId() + "/imagem?v=" + p.getImagemVersao() : null,
+                        p.getImagemLargura(),
+                        p.getImagemAltura()))
                 .toList();
     }
 

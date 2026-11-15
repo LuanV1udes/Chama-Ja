@@ -5,6 +5,7 @@
 <header th:replace="~{fragments/layout :: barra(${est.nome}, 'promocoes')}"></header>
 
 <main class="container largo">
+    <div class="alerta alerta-erro" th:if="${erro}" th:text="${erro}">Erro</div>
     <div class="alerta alerta-info" th:if="${ok}" th:text="${ok}">Ok</div>
 
     <div class="titulo-linha">
@@ -12,7 +13,10 @@
         <a class="btn btn-primario" th:href="@{/painel/promocoes/nova}">Nova promoção</a>
     </div>
 
-    <p class="nota">O cliente vê só as promoções ativas e dentro da validade.</p>
+    <p class="nota">
+        O cliente vê só as promoções ativas e dentro da validade. Promoção com <strong>banner</strong> aparece
+        como a imagem; sem banner, aparece o cartão padrão do sistema.
+    </p>
 
     <section class="cartao" th:if="${#lists.isEmpty(promocoes)}">
         <p>Nenhuma promoção cadastrada ainda.</p>
@@ -22,15 +26,20 @@
         <div class="tabela-rolavel">
             <table>
                 <thead>
-                <tr><th>Título</th><th>Preço</th><th>Validade</th><th>Situação</th><th></th></tr>
+                <tr><th>Como aparece</th><th>Título</th><th>Preço</th><th>Validade</th><th>Situação</th><th></th></tr>
                 </thead>
                 <tbody>
                 <tr th:each="p : ${promocoes}">
                     <td>
+                        <img th:if="${p.temImagem()}" class="mini-banner" alt="Banner da promoção"
+                             th:src="@{/painel/promocoes/{id}/imagem(id=${p.id},v=${p.imagemVersao})}">
+                        <span th:unless="${p.temImagem()}" class="selo">Cartão padrão</span>
+                    </td>
+                    <td>
                         <strong th:text="${p.titulo}">Título</strong>
                         <div class="nota" th:text="${p.descricao}">Descrição</div>
                     </td>
-                    <td th:text="${#numbers.formatDecimal(p.preco, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+                    <td th:text="${p.preco != null} ? ${#numbers.formatDecimal(p.preco, 1, 'POINT', 2, 'COMMA')} : '—'">0,00</td>
                     <td th:text="${#temporals.format(p.validade, 'dd/MM/yyyy')}">01/01/2026</td>
                     <td>
                         <span class="selo selo-cancelada" th:if="${p.vencida}">Vencida</span>

@@ -204,6 +204,10 @@ a { color: var(--destaque); }
 .promocoes .validade { color: var(--suave); font-size: .8rem; }
 .promocoes .preco { color: var(--destaque); font-weight: 600; font-size: 1.5rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
 
+/* Banner pronto do mercado: a imagem ocupa o cartão inteiro, sem texto por cima nem embaixo. */
+.promocoes li.promo-banner { padding: 0; overflow: hidden; display: block; }
+.promocoes li.promo-banner img { display: block; width: 100%; height: auto; background: var(--borda); }
+
 #form-sair { margin-top: 1.5rem; text-align: center; }
 
 /* ---------- Avisos no celular (mensagem animada que sobe do rodapé) ---------- */
@@ -380,6 +384,17 @@ body.tela { background: var(--primaria); color: var(--sobre); }
 .tela-marca { margin: .5rem 0 0; font-size: .9rem; color: var(--sobre-suave); }
 
 /* ---------- Painel: tela de entrada ---------- */
+/* ---------- Painel: banner da promoção ---------- */
+.banner-bloco { border: 1px dashed var(--borda); border-radius: 12px; padding: .9rem 1rem 1rem; margin: 1.1rem 0 0; }
+.banner-bloco legend { padding: 0 .4rem; font-weight: 500; }
+.banner-bloco .nota { margin: 0 0 .75rem; }
+.banner-previa { display: block; max-width: 100%; max-height: 220px; border-radius: 12px; border: 1px solid var(--borda); margin: 0 0 .6rem; }
+.opcao-linha { display: flex !important; align-items: center; gap: .5rem; font-weight: 400 !important; margin: 0 0 .75rem !important; }
+.opcao-linha input { width: auto !important; }
+.rotulo-arquivo { margin-top: .25rem !important; }
+.form input[type="file"] { background: transparent; border: 0; padding: .4rem 0; }
+.mini-banner { display: block; width: 120px; height: 64px; object-fit: cover; border-radius: 8px; border: 1px solid var(--borda); }
+
 .campo-link {
   width: 100%; font: inherit; padding: .7rem .9rem; border: 1px solid var(--borda);
   border-radius: 12px; background: var(--fundo); color: var(--texto); word-break: break-all;

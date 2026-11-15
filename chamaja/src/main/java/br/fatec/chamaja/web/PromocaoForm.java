@@ -7,11 +7,15 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-/** Formulário de promoção (RF14): título, descrição, preço e validade. */
+/**
+ * Formulário de promoção (RF14): título, descrição, preço, validade e, opcionalmente, o banner pronto.
+ * O preço é obrigatório só quando não há banner (a regra está em PromocaoService).
+ */
 public class PromocaoForm {
 
     private Long id;
@@ -23,7 +27,6 @@ public class PromocaoForm {
     @Size(max = 500, message = "A descrição pode ter até 500 caracteres.")
     private String descricao;
 
-    @NotNull(message = "Informe o preço.")
     @DecimalMin(value = "0.00", message = "O preço não pode ser negativo.")
     @Digits(integer = 8, fraction = 2, message = "Use no máximo 2 casas decimais.")
     private BigDecimal preco;
@@ -31,6 +34,12 @@ public class PromocaoForm {
     @NotNull(message = "Informe a validade.")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate validade;
+
+    /** Banner novo (opcional). Se vier, substitui o atual. */
+    private MultipartFile imagem;
+
+    /** Marcado no formulário para tirar o banner atual e voltar ao cartão padrão. */
+    private boolean removerImagem;
 
     public static PromocaoForm de(Promocao p) {
         PromocaoForm form = new PromocaoForm();
@@ -80,5 +89,21 @@ public class PromocaoForm {
 
     public void setValidade(LocalDate validade) {
         this.validade = validade;
+    }
+
+    public MultipartFile getImagem() {
+        return imagem;
+    }
+
+    public void setImagem(MultipartFile imagem) {
+        this.imagem = imagem;
+    }
+
+    public boolean isRemoverImagem() {
+        return removerImagem;
+    }
+
+    public void setRemoverImagem(boolean removerImagem) {
+        this.removerImagem = removerImagem;
     }
 }

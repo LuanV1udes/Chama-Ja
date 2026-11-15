@@ -37,7 +37,8 @@ O MVP cobre o ciclo completo de uma fila: entrar, esperar, ser avisado, ser cham
 - Avisos no celular por Web Push (notificação com a tela bloqueada), que o cliente ativa com um toque depois de pegar a senha
 - Painel do operador para chamar, repetir, pular e finalizar senhas
 - Cadastro, edição e remoção de promoções
-- Exibição das promoções ativas para o cliente
+- Exibição das promoções ativas para o cliente, com o banner pronto do mercado quando houver
+- Envio de banner (imagem) pelo operador, guardado no banco e otimizado para o celular
 
 **Fora do escopo (versões futuras)**
 
@@ -61,13 +62,13 @@ Cada requisito tem um código para facilitar a referência nos testes e na apres
 | RF05 | Cliente | Ser avisado quando faltarem até 3 números para a sua senha: faixa de aviso na tela (com vibração e som uma única vez) e, se ele ativou os avisos no celular, também por notificação, mesmo com a tela bloqueada |
 | RF06 | Cliente | Ser avisado quando for chamado (ou quando a chamada for repetida), na tela e, se ativou os avisos no celular, por notificação |
 | RF07 | Cliente | Sair da fila antes de ser chamado |
-| RF08 | Cliente | Ver a lista de promoções ativas enquanto espera |
+| RF08 | Cliente | Ver a lista de promoções ativas enquanto espera: o banner do mercado, quando houver, ou o cartão padrão do sistema |
 | RF09 | Operador | Fazer login para acessar o painel |
 | RF10 | Operador | Chamar a próxima senha |
 | RF11 | Operador | Repetir a chamada, pular ou finalizar uma senha |
 | RF12 | Operador | Ver a fila completa com status de cada senha |
 | RF13 | Operador | Abrir, pausar, fechar e zerar a fila do dia |
-| RF14 | Operador | Cadastrar promoção com título, descrição, preço e validade |
+| RF14 | Operador | Cadastrar promoção com título e validade e, no cartão padrão, descrição e preço; ou, se o mercado já tem o banner pronto, enviar a imagem dele (JPG ou PNG, até 3 MB), caso em que descrição e preço são opcionais |
 | RF15 | Operador | Editar, ativar, desativar e excluir promoções |
 | RF16 | Operador | Obter o link da tela de entrada (tablet da porta, que exibe o QR code rotativo) e gerar um novo link quando necessário |
 
@@ -80,6 +81,7 @@ Cada requisito tem um código para facilitar a referência nos testes e na apres
 - **Estados da fila (RF13).** *Aberta*: aceita novas senhas e chama normalmente. *Pausada*: não aceita novas senhas, mas o operador continua chamando as já existentes. *Fechada*: não aceita novas senhas e não chama.
 - **Numeração.** As senhas são sequenciais, com 3 dígitos (ex.: 014), e a contagem reinicia quando a fila do dia é zerada.
 - **QR code rotativo (RF01 e RF16).** O QR exibido na tela de entrada carrega um código assinado pelo servidor que muda a cada minuto e vale só para o minuto atual e o anterior. Uma foto do QR deixa de funcionar em poucos minutos, então não dá para pegar senha de casa com ela. Ao escanear um código válido, o aparelho recebe uma permissão de 10 minutos e de **uso único**: dá tempo de digitar o nome, mas não de pegar várias senhas em sequência. Sem escanear, a página só pede para escanear o QR na entrada.
+- **Banner da promoção (RF08 e RF14).** Cada promoção aparece de um de dois jeitos: com **banner** (a imagem que o mercado já tem, exibida sozinha, sem texto por cima ou por baixo) ou, sem banner, com o **cartão padrão** do sistema (título, descrição e preço). Com banner, preço e descrição são opcionais; sem banner, o preço é obrigatório. O operador envia JPG ou PNG de até 3 MB, com prévia e opção de remover. O sistema nunca guarda o arquivo como veio: confere o conteúdo real (não o nome), limita as dimensões, reduz para no máximo 1000 pixels, regrava como JPEG leve e descarta metadados (como a localização do celular). A imagem é guardada no banco, em tabela separada, e só é entregue ao cliente enquanto a promoção está ativa e dentro da validade.
 - **Avisos no celular (Web Push).** Assim que o cliente pega a senha, aparece uma mensagem animada: "Quer ser avisado?" com **Permitir notificações** e **Agora não**. Se ele permite, o navegador se inscreve no serviço de push e a inscrição é ligada à senha dele. O servidor envia uma notificação quando faltam até 3 números (uma vez só), quando a senha é chamada e quando o operador repete a chamada. Se a página do cliente está aberta e visível, ela mesma avisa e o push não duplica. Quem já permitiu antes não é perguntado de novo. A inscrição some quando a senha termina (finalizada, pulada, cancelada), ao zerar a fila e no reset diário. Por segurança, o servidor só envia para endereços HTTPS dos serviços de push dos navegadores (Google, Mozilla, Apple e Microsoft), para que ninguém use o envio contra a rede interna.
 - **Equipamentos sugeridos.** *Tablet externo (porta):* abre o link secreto da tela de entrada e só mostra o QR (sem login, sem acesso ao painel). *Tablet interno (atendimento):* painel do operador. *Reserva (celular ou computador):* também abre o painel, ao mesmo tempo e com o mesmo login, e pode abrir o link da tela no lugar do tablet externo. Se o link da tela vazar, o operador gera outro no painel e o antigo deixa de funcionar.
 
