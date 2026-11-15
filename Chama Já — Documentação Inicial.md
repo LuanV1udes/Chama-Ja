@@ -29,7 +29,7 @@ O MVP cobre o ciclo completo de uma fila: entrar, esperar, ser avisado, ser cham
 
 **Dentro do escopo**
 
-- Geração de QR code do estabelecimento
+- QR code rotativo exibido numa tela na entrada do estabelecimento (muda a cada minuto)
 - Retirada de senha pelo celular, sem instalar app
 - Acompanhamento da posição na fila em tempo real
 - Aviso na tela do cliente quando faltarem até 3 números para a vez dele
@@ -53,7 +53,7 @@ Cada requisito tem um código para facilitar a referência nos testes e na apres
 
 | Código | Perfil | Requisito |
 | --- | --- | --- |
-| RF01 | Cliente | Acessar o sistema ao escanear o QR code do estabelecimento |
+| RF01 | Cliente | Acessar o sistema ao escanear o QR code rotativo exibido na entrada do estabelecimento |
 | RF02 | Cliente | Informar o nome e retirar uma senha |
 | RF03 | Cliente | Ver a senha, a posição na fila e quantas pessoas estão à frente |
 | RF04 | Cliente | Ver a senha atual sendo chamada |
@@ -68,7 +68,7 @@ Cada requisito tem um código para facilitar a referência nos testes e na apres
 | RF13 | Operador | Abrir, pausar, fechar e zerar a fila do dia |
 | RF14 | Operador | Cadastrar promoção com título, descrição, preço e validade |
 | RF15 | Operador | Editar, ativar, desativar e excluir promoções |
-| RF16 | Operador | Gerar e imprimir o QR code do estabelecimento |
+| RF16 | Operador | Obter o link da tela de entrada (tablet da porta, que exibe o QR code rotativo) e gerar um novo link quando necessário |
 
 **Regras de negócio**
 
@@ -78,6 +78,8 @@ Cada requisito tem um código para facilitar a referência nos testes e na apres
 - **Pular (RF11).** A senha pulada não volta sozinha para a fila. Se o cliente aparecer depois, precisa retirar uma nova senha.
 - **Estados da fila (RF13).** *Aberta*: aceita novas senhas e chama normalmente. *Pausada*: não aceita novas senhas, mas o operador continua chamando as já existentes. *Fechada*: não aceita novas senhas e não chama.
 - **Numeração.** As senhas são sequenciais, com 3 dígitos (ex.: 014), e a contagem reinicia quando a fila do dia é zerada.
+- **QR code rotativo (RF01 e RF16).** O QR exibido na tela de entrada carrega um código assinado pelo servidor que muda a cada minuto e vale só para o minuto atual e o anterior. Uma foto do QR deixa de funcionar em poucos minutos, então não dá para pegar senha de casa com ela. Ao escanear um código válido, o aparelho recebe uma permissão de 10 minutos e de **uso único**: dá tempo de digitar o nome, mas não de pegar várias senhas em sequência. Sem escanear, a página só pede para escanear o QR na entrada.
+- **Equipamentos sugeridos.** *Tablet externo (porta):* abre o link secreto da tela de entrada e só mostra o QR (sem login, sem acesso ao painel). *Tablet interno (atendimento):* painel do operador. *Reserva (celular ou computador):* também abre o painel, ao mesmo tempo e com o mesmo login, e pode abrir o link da tela no lugar do tablet externo. Se o link da tela vazar, o operador gera outro no painel e o antigo deixa de funcionar.
 
 ## 5. Requisitos não funcionais
 
@@ -153,7 +155,7 @@ Com Java, o login e a atualização em tempo real são implementados no próprio
 
 | Risco | Mitigação |
 | --- | --- |
-| Cliente pega senha sem estar no local | QR code afixado no estabelecimento; limite de uma senha ativa por aparelho. **Limitação conhecida:** uma foto do QR ou a troca de aparelho contorna a regra; uma melhoria futura é um código que muda a cada dia |
+| Cliente pega senha sem estar no local | QR code rotativo numa tela na entrada (o código muda a cada minuto), permissão de uso único ao escanear, uma senha ativa por aparelho e limite de requisições por IP. **Limitação conhecida:** alguém dentro do local pode repassar o QR ao vivo a um amigo, que o usa em até ~2 minutos; sem hardware de presença (como GPS confiável ou Bluetooth), isso não se elimina por completo |
 | Cliente sem celular ou sem internet | Manter a senha impressa ou o atendimento tradicional como alternativa |
 | Cliente fecha a tela e perde o aviso de proximidade | No MVP os avisos só aparecem com a página aberta; notificação push fica para uma versão futura |
 | Operador esquece de atualizar a fila | Botão único "Chamar próxima" e aviso de senha chamada há muito tempo sem finalizar |

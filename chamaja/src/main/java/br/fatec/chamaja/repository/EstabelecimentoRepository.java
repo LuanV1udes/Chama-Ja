@@ -13,6 +13,8 @@ public interface EstabelecimentoRepository extends JpaRepository<Estabelecimento
 
     Optional<Estabelecimento> findByCodigoQr(String codigoQr);
 
+    Optional<Estabelecimento> findByCodigoTela(String codigoTela);
+
     /** Trava a linha para que duas retiradas simultâneas não recebam o mesmo número. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select e from Estabelecimento e where e.codigoQr = :codigo")

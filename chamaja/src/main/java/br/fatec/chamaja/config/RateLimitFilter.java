@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -22,8 +23,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class RateLimitFilter extends OncePerRequestFilter {
 
-    static final int LIMITE_POR_MINUTO = 30;
     private static final long JANELA_MS = 60_000L;
+
+    private final int limitePorMinuto;
+
+    public RateLimitFilter(@Value("${chamaja.rate-limit.por-minuto:30}") int limitePorMinuto) {
+        this.limitePorMinuto = limitePorMinuto;
+    }
 
     private record Janela(long inicio, AtomicInteger contagem) {
     }
@@ -32,11 +38,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        if (!"POST".equals(request.getMethod())) {
-            return true;
-        }
         String caminho = request.getRequestURI();
-        return !(caminho.startsWith("/q/") || caminho.startsWith("/senha/") || caminho.equals("/login"));
+        // Escanear o QR (GET /q/{codigo}?t=...) conta: cada leitura válida libera uma permissão.
+        boolean escaneando = "GET".equals(request.getMethod())
+                && caminho.startsWith("/q/") && request.getParameter("t") != null;
+        boolean alterando = "POST".equals(request.getMethod())
+                && (caminho.startsWith("/q/") || caminho.startsWith("/senha/") || caminho.equals("/login"));
+        return !(escaneando || alterando);
     }
 
     @Override
@@ -50,7 +58,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         Janela janela = janelas.compute(request.getRemoteAddr(), (ip, atual) ->
                 atual == null || agora - atual.inicio() > JANELA_MS ? new Janela(agora, new AtomicInteger()) : atual);
 
-        if (janela.contagem().incrementAndGet() > LIMITE_POR_MINUTO) {
+        if (janela.contagem().incrementAndGet() > limitePorMinuto) {
             response.setStatus(429);
             response.setContentType("text/plain;charset=UTF-8");
             response.getWriter().write("Muitas tentativas. Aguarde um minuto e tente de novo.");

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Tela de entrada')}"></head>
+<body class="painel">
+<header th:replace="~{fragments/layout :: barra(${est.nome}, 'tela')}"></header>
+
+<main class="container largo">
+    <div class="alerta alerta-info" th:if="${ok}" th:text="${ok}">Ok</div>
+
+    <div class="titulo-linha">
+        <h1>Tela de entrada</h1>
+    </div>
+    <p class="nota">
+        O QR code muda a cada minuto, então uma foto dele não serve para pegar senha de casa.
+        Ele aparece num tablet na porta do estabelecimento, num endereço secreto próprio.
+    </p>
+
+    <section class="cartao">
+        <h2>Link do tablet da entrada</h2>
+        <p>Abra este endereço no tablet que ficará na porta. Ele só mostra o QR code e <strong>não dá acesso ao painel</strong>,
+           por isso não precisa de login.</p>
+        <input class="campo-link" type="text" readonly th:value="${urlTela}" onclick="this.select()"
+               aria-label="Link da tela de entrada">
+        <div class="acoes">
+            <a class="btn btn-primario" th:href="${urlTela}" target="_blank" rel="noopener">Abrir a tela agora</a>
+        </div>
+    </section>
+
+    <section class="cartao">
+        <h2>Como montar</h2>
+        <ul class="lista-passos">
+            <li><strong>Tablet externo (porta):</strong> abre o link acima, em tela cheia e com a tela sempre ligada.</li>
+            <li><strong>Tablet interno (atendimento):</strong> abre o painel e faz login. É onde se chama, pula e finaliza as senhas.</li>
+            <li><strong>Reserva (celular ou computador):</strong> pode abrir o painel ao mesmo tempo, com o mesmo login, se o tablet interno falhar.
+                Também serve de reserva para o tablet externo: basta abrir o mesmo link nele.</li>
+        </ul>
+    </section>
+
+    <section class="cartao">
+        <h2>Gerar um novo link</h2>
+        <p>Use se o link do tablet foi compartilhado sem querer ou se o tablet sumiu. O link antigo deixa de funcionar na hora
+           e é preciso abrir o novo no tablet da entrada.</p>
+        <form th:action="@{/painel/tela/renovar}" method="post"
+              onsubmit="return confirm('Gerar um novo link? O link atual deixa de funcionar.')">
+            <button type="submit" class="btn btn-perigo">Gerar novo link</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

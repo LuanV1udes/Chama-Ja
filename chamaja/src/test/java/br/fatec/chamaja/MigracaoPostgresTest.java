@@ -5,11 +5,13 @@ import br.fatec.chamaja.model.Estabelecimento;
 import br.fatec.chamaja.repository.EstabelecimentoRepository;
 import br.fatec.chamaja.service.FilaService;
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -87,6 +89,38 @@ class MigracaoPostgresTest {
     void osDadosIniciaisForamCriadosPeloSeed() {
         Integer operadores = jdbc.queryForObject("select count(*) from chamaja.operador", Integer.class);
         assertThat(operadores).isEqualTo(1);
+    }
+
+    @Test
+    void oEstabelecimentoDoSeedTemCodigoDaTela() {
+        String codigoTela = jdbc.queryForObject(
+                "select codigo_tela from chamaja.estabelecimento order by id limit 1", String.class);
+        assertThat(codigoTela).hasSize(32);
+    }
+
+    /**
+     * O banco de produção já tinha estabelecimentos quando a V2 foi criada. Aqui: aplica só a V1,
+     * insere dados "antigos" e só então aplica a V2; todos precisam ganhar um código único.
+     */
+    @Test
+    void aV2PreencheOCodigoDaTelaDosEstabelecimentosQueJaExistiam() {
+        jdbc.execute("create database antigo");
+        var banco = new DriverManagerDataSource(POSTGRES.getJdbcUrl("postgres", "antigo"), "postgres", "postgres");
+
+        Flyway.configure().dataSource(banco).schemas("chamaja").defaultSchema("chamaja")
+                .createSchemas(true).target("1").load().migrate();
+
+        var antigo = new JdbcTemplate(banco);
+        antigo.update("insert into chamaja.estabelecimento (nome, codigo_qr, estado_fila, senha_atual, ultimo_numero) "
+                + "values ('Loja A', 'lojaa', 'ABERTA', 0, 0), ('Loja B', 'lojab', 'FECHADA', 3, 5)");
+
+        Flyway.configure().dataSource(banco).schemas("chamaja").defaultSchema("chamaja").load().migrate();
+
+        List<String> codigos = antigo.queryForList("select codigo_tela from chamaja.estabelecimento", String.class);
+        assertThat(codigos).hasSize(2).doesNotContainNull().doesNotHaveDuplicates()
+                .allSatisfy(c -> assertThat(c).hasSize(32));
+        assertThat(antigo.queryForObject("select count(*) from chamaja.estabelecimento where nome = 'Loja B' "
+                + "and senha_atual = 3 and ultimo_numero = 5", Integer.class)).isEqualTo(1);
     }
 
     @Test

@@ -16,7 +16,7 @@
 <nav class="pills" aria-label="Painel" th:fragment="pills(ativo)">
     <a th:href="@{/painel}" th:classappend="${ativo == 'fila'} ? 'ativo'" th:attr="aria-current=${ativo == 'fila' ? 'page' : null}">Fila</a>
     <a th:href="@{/painel/promocoes}" th:classappend="${ativo == 'promocoes'} ? 'ativo'" th:attr="aria-current=${ativo == 'promocoes' ? 'page' : null}">Promoções</a>
-    <a th:href="@{/painel/qr}" th:classappend="${ativo == 'qr'} ? 'ativo'" th:attr="aria-current=${ativo == 'qr' ? 'page' : null}">QR code</a>
+    <a th:href="@{/painel/tela}" th:classappend="${ativo == 'tela'} ? 'ativo'" th:attr="aria-current=${ativo == 'tela' ? 'page' : null}">Tela de entrada</a>
 </nav>
 
 <!-- Barra do topo das telas de promoções e QR code -->
@@ -28,7 +28,7 @@
     <nav class="pills" aria-label="Painel">
         <a th:href="@{/painel}" th:classappend="${ativo == 'fila'} ? 'ativo'">Fila</a>
         <a th:href="@{/painel/promocoes}" th:classappend="${ativo == 'promocoes'} ? 'ativo'">Promoções</a>
-        <a th:href="@{/painel/qr}" th:classappend="${ativo == 'qr'} ? 'ativo'">QR code</a>
+        <a th:href="@{/painel/tela}" th:classappend="${ativo == 'tela'} ? 'ativo'">Tela de entrada</a>
     </nav>
     <form th:action="@{/logout}" method="post" class="topo-sair">
         <button type="submit" class="btn btn-sutil">Sair</button>

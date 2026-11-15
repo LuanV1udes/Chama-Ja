@@ -248,6 +248,21 @@ public class FilaService {
         estabelecimentos.findAll().forEach(e -> zerar(e.getId()));
     }
 
+    // ------------------------------------------------------------------ tela de entrada
+
+    @Transactional(readOnly = true)
+    public Optional<Estabelecimento> buscarPorCodigoTela(String codigoTela) {
+        return estabelecimentos.findByCodigoTela(codigoTela);
+    }
+
+    /** Gera outro link para a tela de entrada; o anterior deixa de funcionar na hora. */
+    @Transactional
+    public String renovarCodigoTela(Long estabelecimentoId) {
+        Estabelecimento est = travar(estabelecimentoId);
+        est.renovarCodigoTela();
+        return est.getCodigoTela();
+    }
+
     // ------------------------------------------------------------------ internos
 
     private Estabelecimento travar(Long estabelecimentoId) {

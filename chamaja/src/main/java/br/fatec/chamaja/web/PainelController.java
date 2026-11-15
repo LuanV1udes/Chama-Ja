@@ -5,12 +5,7 @@ import br.fatec.chamaja.model.Estabelecimento;
 import br.fatec.chamaja.repository.OperadorRepository;
 import br.fatec.chamaja.service.FilaException;
 import br.fatec.chamaja.service.FilaService;
-import br.fatec.chamaja.service.QrCodeService;
 import br.fatec.chamaja.service.SseHub;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.CacheControl;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 /** Painel do operador (RF09 a RF13 e RF16). Tudo aqui exige login. */
 @Controller
@@ -30,20 +24,17 @@ public class PainelController {
 
     private final OperadorRepository operadores;
     private final FilaService fila;
-    private final QrCodeService qrCode;
     private final SseHub sse;
-    private final String baseUrl;
+    private final UrlsPublicas urls;
 
     public PainelController(OperadorRepository operadores,
                             FilaService fila,
-                            QrCodeService qrCode,
                             SseHub sse,
-                            @Value("${chamaja.base-url:}") String baseUrl) {
+                            UrlsPublicas urls) {
         this.operadores = operadores;
         this.fila = fila;
-        this.qrCode = qrCode;
         this.sse = sse;
-        this.baseUrl = baseUrl;
+        this.urls = urls;
     }
 
     /** RF12: fila completa com o status de cada senha. */
@@ -95,23 +86,22 @@ public class PainelController {
         return sse.assinar(estabelecimento(auth).getId());
     }
 
-    /** RF16: página para imprimir o QR code. */
-    @GetMapping("/qr")
-    public String qr(Authentication auth, Model model) {
+    /** RF16: link da tela de entrada (o tablet da porta mostra o QR rotativo). */
+    @GetMapping("/tela")
+    public String tela(Authentication auth, Model model) {
         Estabelecimento est = estabelecimento(auth);
         model.addAttribute("est", est);
-        model.addAttribute("url", urlDoCliente(est));
-        return "operador/qr";
+        model.addAttribute("urlTela", urls.urlDaTela(est));
+        return "operador/tela";
     }
 
-    @GetMapping(value = "/qr.png", produces = MediaType.IMAGE_PNG_VALUE)
-    @ResponseBody
-    public ResponseEntity<byte[]> qrPng(Authentication auth) {
-        byte[] png = qrCode.png(urlDoCliente(estabelecimento(auth)), 600);
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.noStore())
-                .contentType(MediaType.IMAGE_PNG)
-                .body(png);
+    /** Gera outro link para a tela de entrada, invalidando o anterior (se o link vazou ou o tablet sumiu). */
+    @PostMapping("/tela/renovar")
+    public String renovarTela(Authentication auth, RedirectAttributes flash) {
+        return executar(flash, () -> {
+            fila.renovarCodigoTela(estabelecimento(auth).getId());
+            flash.addFlashAttribute("ok", "Novo link gerado. O link antigo deixou de funcionar: abra o novo no tablet da entrada.");
+        }, "redirect:/painel/tela");
     }
 
     // ------------------------------------------------------------------ internos
@@ -122,19 +112,16 @@ public class PainelController {
                 .getEstabelecimento();
     }
 
-    private String urlDoCliente(Estabelecimento est) {
-        String base = baseUrl.isBlank()
-                ? ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
-                : baseUrl.replaceAll("/+$", "");
-        return base + "/q/" + est.getCodigoQr();
+    private String executar(RedirectAttributes flash, Runnable acao) {
+        return executar(flash, acao, "redirect:/painel");
     }
 
-    private String executar(RedirectAttributes flash, Runnable acao) {
+    private String executar(RedirectAttributes flash, Runnable acao, String destino) {
         try {
             acao.run();
         } catch (FilaException e) {
             flash.addFlashAttribute("erro", e.getMessage());
         }
-        return "redirect:/painel";
+        return destino;
     }
 }

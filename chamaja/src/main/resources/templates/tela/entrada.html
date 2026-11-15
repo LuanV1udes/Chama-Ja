@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Tela de entrada')}"></head>
+<body class="tela" th:attr="data-intervalo=${intervalo}">
+
+<main class="tela-corpo">
+    <p class="tela-est" th:text="${est.nome}">Mercado</p>
+    <h1 class="tela-titulo">Escaneie para pegar sua senha</h1>
+
+    <div class="tela-qr">
+        <img id="qr" th:src="@{/tela/{s}/qr.png(s=${est.codigoTela})}" width="520" height="520"
+             alt="QR code para entrar na fila">
+    </div>
+
+    <p class="tela-nota">Abra a câmera do celular e aponte para o QR code. Ele muda a cada minuto.</p>
+    <p class="tela-erro" id="erro" hidden role="alert">
+        Não foi possível atualizar o QR code. Verifique a internet; se o problema continuar,
+        gere um novo link no painel.
+    </p>
+    <p class="tela-marca">Chama Já · Sua vez, no seu tempo.</p>
+</main>
+
+<script th:src="@{/js/tela.js}"></script>
+</body>
+</html>

@@ -9,6 +9,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "estabelecimento")
 public class Estabelecimento {
@@ -22,6 +24,10 @@ public class Estabelecimento {
 
     @Column(name = "codigo_qr", nullable = false, unique = true, length = 40)
     private String codigoQr;
+
+    /** Segredo do link da tela de entrada (/tela/{codigoTela}); o operador pode renová-lo. */
+    @Column(name = "codigo_tela", nullable = false, unique = true, length = 40)
+    private String codigoTela;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_fila", nullable = false, length = 10)
@@ -41,6 +47,17 @@ public class Estabelecimento {
     public Estabelecimento(String nome, String codigoQr) {
         this.nome = nome;
         this.codigoQr = codigoQr;
+        this.codigoTela = novoCodigoTela();
+    }
+
+    /** 128 bits aleatórios (UUID sem hífens): impossível de adivinhar. */
+    private static String novoCodigoTela() {
+        return UUID.randomUUID().toString().replace("-", "");
+    }
+
+    /** Invalida o link atual da tela de entrada e gera outro. */
+    public void renovarCodigoTela() {
+        this.codigoTela = novoCodigoTela();
     }
 
     public int proximoNumero() {
@@ -62,6 +79,10 @@ public class Estabelecimento {
 
     public String getCodigoQr() {
         return codigoQr;
+    }
+
+    public String getCodigoTela() {
+        return codigoTela;
     }
 
     public EstadoFila getEstadoFila() {

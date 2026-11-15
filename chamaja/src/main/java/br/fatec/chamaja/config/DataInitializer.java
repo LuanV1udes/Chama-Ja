@@ -60,6 +60,7 @@ public class DataInitializer implements ApplicationRunner {
         operadores.save(new Operador(est, usuario, encoder.encode(senha)));
 
         log.info("Estabelecimento '{}' criado. Página do cliente: /q/{}", est.getNome(), est.getCodigoQr());
+        log.info("Tela de entrada (QR rotativo, para o tablet da porta): /tela/{}", est.getCodigoTela());
         if (gerada) {
             log.warn("Operador '{}' criado com a senha gerada: {}  (defina SEED_SENHA para escolher a sua)",
                     usuario, senha);

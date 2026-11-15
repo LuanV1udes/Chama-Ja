@@ -14,8 +14,12 @@ mvn spring-boot:run "-Dspring-boot.run.profiles=dev"
 O perfil `dev` usa um banco H2 em memória (some ao parar o app) e cria os dados iniciais:
 
 - Operador: `operador` / `operador123` → <http://localhost:8080/login>
-- A página do cliente aparece no log: `Página do cliente: /q/<codigo>` → <http://localhost:8080/q/CODIGO>
-- No painel, **QR code** gera a página para imprimir.
+- A **tela de entrada** (o QR rotativo) aparece no log: `Tela de entrada ...: /tela/<codigo>` →
+  <http://localhost:8080/tela/CODIGO>. É o que o tablet da porta mostra; no painel, a aba **Tela de entrada**
+  mostra o mesmo link.
+- Para pegar senha o cliente precisa **escanear o QR dessa tela** (o código muda a cada minuto). Para testar
+  no celular, defina `APP_BASE_URL` com o IP do computador, por exemplo `http://192.168.0.10:8080`.
+- A página do cliente (`/q/<codigo>`) sozinha só pede para escanear o QR.
 
 ## Testes
 
@@ -27,6 +31,25 @@ Cobrem a regra do aviso com até 3 números de diferença, posição na fila, es
 (aberta, pausada, fechada), zerar a fila, login, CSRF, promoções e QR code. O
 `MigracaoPostgresTest` sobe um PostgreSQL de verdade (embutido, sem Docker), aplica as migrações
 e confere se o schema bate com as entidades.
+
+---
+
+## Tela de entrada e equipamentos
+
+O QR code **não é impresso**: ele aparece num tablet na porta e muda a cada minuto, para que uma foto dele
+não sirva para pegar senha de casa.
+
+| Equipamento | O que abre | Login |
+| --- | --- | --- |
+| **Tablet externo (porta)** | o link da aba **Tela de entrada** do painel (`/tela/<segredo>`) | não precisa: só mostra o QR |
+| **Tablet interno (atendimento)** | `/login` → painel | sim |
+| **Reserva (celular ou computador)** | o painel, ao mesmo tempo, com o mesmo login; ou o link da tela, no lugar do tablet externo | conforme o caso |
+
+- O link da tela é secreto. Se vazar ou o tablet sumir, use **Gerar novo link** no painel: o antigo para na hora.
+- Cada código do QR vale ~1 a 2 minutos. Ao escanear, o aparelho ganha uma permissão de 10 minutos **de uso único**.
+- Deixe o tablet da porta em tela cheia e com a tela sempre ligada (a página tenta evitar que ele apague, mas nem todo
+  navegador permite; confira também a configuração do aparelho).
+- Mantenha **uma única réplica** na Railway: a permissão de uso único e o limite de requisições ficam em memória.
 
 ---
 
@@ -67,6 +90,7 @@ REST aberta; as tabelas também nascem com RLS ligado e sem políticas.
 | `SEED_USUARIO` | usuário do operador (padrão `operador`) | não |
 | `SEED_NOME` | nome do estabelecimento (padrão `Mercado Demo`) | não |
 | `APP_BASE_URL` | `https://seu-app.up.railway.app` (endereço do QR code) | sim, depois de gerar o domínio |
+| `QR_SEGREDO` | texto longo e aleatório que assina os códigos do QR rotativo (em branco = gera um a cada início) | recomendada |
 | `DB_POOL_SIZE` | conexões do pool (padrão `5`) | não |
 
 `SPRING_PROFILES_ACTIVE=prod`, o horário de Brasília e a porta já vêm no `Dockerfile` e na Railway.
@@ -118,7 +142,10 @@ Dockerfile, railway.toml   build e deploy na Railway
 - Uma fila por estabelecimento; um operador por estabelecimento.
 - Os avisos (3 números e "é a sua vez") aparecem com a página aberta, por tela, vibração e som.
   Notificação com o aparelho bloqueado (push/WhatsApp) fica para uma versão futura.
-- "Uma senha por aparelho" usa cookie: protege contra duplo clique, não contra quem apaga o cookie.
+- "Uma senha por aparelho" usa cookie: protege contra duplo clique, não contra quem apaga o cookie. Quem
+  de fato impede pegar senha de longe é o QR rotativo com permissão de uso único.
+- O QR rotativo não impede que alguém **dentro do local** repasse o QR ao vivo a um amigo (que o usaria em até
+  ~2 minutos). Sem hardware de presença isso não se elimina por completo.
 - O SSE e o limite de requisições funcionam em memória: servem para uma instância só. Não aumente
   o número de réplicas na Railway.
 - As senhas e os nomes dos clientes são apagados todo dia às 04:00, horário de Brasília

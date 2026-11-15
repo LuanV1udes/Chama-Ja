@@ -304,11 +304,27 @@ td.num { font-size: 1.4rem; font-weight: 600; font-variant-numeric: tabular-nums
 .selo-finalizada { background: var(--info); color: var(--suave); }
 .selo-pulada, .selo-cancelada, .selo-fechada { background: var(--erro-fundo); color: var(--erro); }
 
-/* ---------- QR code para imprimir ---------- */
-.cartaz { padding: 2rem 1rem; }
-.cartaz-chamada { font-size: 1.15rem; font-weight: 600; }
-.qr { max-width: 100%; height: auto; border: 1px solid var(--borda); border-radius: 12px; background: #fff; }
-.url { word-break: break-all; }
+/* ---------- Tela de entrada (tablet da porta) ---------- */
+body.tela { background: var(--primaria); color: var(--sobre); }
+.tela-corpo {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1rem; padding: 1.5rem; text-align: center;
+}
+.tela-est { margin: 0; font-size: 1.1rem; color: var(--sobre-suave); }
+.tela-titulo { margin: 0; font-size: clamp(1.6rem, 4vw, 2.6rem); font-weight: 600; }
+.tela-qr { background: #ffffff; padding: 1rem; border-radius: 24px; line-height: 0; }
+.tela-qr img { width: min(62vmin, 520px); height: auto; }
+.tela-nota { margin: 0; color: var(--sobre-suave); font-size: 1.05rem; }
+.tela-erro { margin: 0; padding: .6rem 1rem; border-radius: 12px; background: var(--atencao-fundo); color: var(--atencao); }
+.tela-marca { margin: .5rem 0 0; font-size: .9rem; color: var(--sobre-suave); }
+
+/* ---------- Painel: tela de entrada ---------- */
+.campo-link {
+  width: 100%; font: inherit; padding: .7rem .9rem; border: 1px solid var(--borda);
+  border-radius: 12px; background: var(--fundo); color: var(--texto); word-break: break-all;
+}
+.lista-passos { margin: 0; padding-left: 1.2rem; display: grid; gap: .5rem; }
 
 /* ---------- Telas menores (tablet em pé / celular) ---------- */
 @media (max-width: 900px) {
