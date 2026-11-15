@@ -138,11 +138,12 @@ Sugestão de pilha simples para um projeto acadêmico; a equipe pode trocar qual
 | Camada | Sugestão | Por quê |
 | --- | --- | --- |
 | Back-end | Java com Spring Boot (Spring Web, Spring Data JPA) | Linguagem do curso; uma única aplicação com API e telas |
-| Banco de dados | PostgreSQL da Railway | Serviço do mesmo projeto, sem configuração externa |
+| Banco de dados | PostgreSQL do Supabase (via pooler) | Banco gerenciado e gratuito; as tabelas ficam num schema próprio (`chamaja`), criado pelo Flyway, fora da API pública do Supabase |
 | Tempo real | SSE (Server-Sent Events) do Spring | A fila e os avisos mudam na tela do cliente sem recarregar; o servidor só envia atualizações |
 | Login do operador | Spring Security | Controle de acesso do painel, com senha em hash |
 | Interface | HTML, CSS e JavaScript servidos pelo Spring (ex.: Thymeleaf), responsivos | Sem instalação: o cliente só abre o link do QR code |
 | QR code | Biblioteca ZXing | Gera o código que aponta para a página do estabelecimento |
+| Migrações | Flyway | O schema do banco é versionado em arquivos SQL; o Hibernate só confere se bate |
 | Rotina diária | `@Scheduled` do Spring | Apaga os dados dos clientes e reinicia a numeração ao fim do dia |
 | Hospedagem | Railway, com deploy a partir do GitHub | Projeto já usado pela equipe; link público para a demonstração |
 
@@ -167,5 +168,7 @@ Com Java, o login e a atualização em tempo real são implementados no próprio
 - [x] Implementar o fluxo do cliente (RF01 a RF08)
 - [x] Implementar o painel do operador (RF09 a RF16)
 - [x] Testar com uma fila simulada (26 testes automatizados e um cenário de ponta a ponta com 6 clientes)
-- [ ] Publicar na Railway e testar com celulares reais
+- [x] Preparar o deploy: migrações (Flyway), Dockerfile e passo a passo do Supabase e da Railway (README)
+- [ ] Criar o projeto no Supabase e o serviço na Railway, e publicar
+- [ ] Testar com celulares reais
 - [ ] Ajustar o visual com base no protótipo aprovado
