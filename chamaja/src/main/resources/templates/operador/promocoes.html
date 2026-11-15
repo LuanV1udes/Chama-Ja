@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Promoções')}"></head>
+<body class="painel">
+<header th:replace="~{fragments/layout :: barra(${est.nome}, 'promocoes')}"></header>
+
+<main class="container largo">
+    <div class="alerta alerta-info" th:if="${ok}" th:text="${ok}">Ok</div>
+
+    <div class="titulo-linha">
+        <h1>Promoções</h1>
+        <a class="btn btn-primario" th:href="@{/painel/promocoes/nova}">Nova promoção</a>
+    </div>
+
+    <p class="nota">O cliente vê só as promoções ativas e dentro da validade.</p>
+
+    <section class="cartao" th:if="${#lists.isEmpty(promocoes)}">
+        <p>Nenhuma promoção cadastrada ainda.</p>
+    </section>
+
+    <section class="cartao" th:unless="${#lists.isEmpty(promocoes)}">
+        <div class="tabela-rolavel">
+            <table>
+                <thead>
+                <tr><th>Título</th><th>Preço</th><th>Validade</th><th>Situação</th><th></th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${promocoes}">
+                    <td>
+                        <strong th:text="${p.titulo}">Título</strong>
+                        <div class="nota" th:text="${p.descricao}">Descrição</div>
+                    </td>
+                    <td th:text="${#numbers.formatDecimal(p.preco, 1, 'POINT', 2, 'COMMA')}">0,00</td>
+                    <td th:text="${#temporals.format(p.validade, 'dd/MM/yyyy')}">01/01/2026</td>
+                    <td>
+                        <span class="selo selo-cancelada" th:if="${p.vencida}">Vencida</span>
+                        <span class="selo selo-aberta" th:if="${!p.vencida and p.ativa}">Ativa</span>
+                        <span class="selo selo-fechada" th:if="${!p.vencida and !p.ativa}">Inativa</span>
+                    </td>
+                    <td class="acoes-linha">
+                        <a class="btn" th:href="@{/painel/promocoes/{id}/editar(id=${p.id})}">Editar</a>
+                        <form th:action="@{/painel/promocoes/{id}/ativa(id=${p.id})}" method="post">
+                            <button type="submit" class="btn" th:text="${p.ativa} ? 'Desativar' : 'Ativar'">Ativar</button>
+                        </form>
+                        <form th:action="@{/painel/promocoes/{id}/excluir(id=${p.id})}" method="post"
+                              onsubmit="return confirm('Excluir esta promoção?')">
+                            <button type="submit" class="btn btn-perigo">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

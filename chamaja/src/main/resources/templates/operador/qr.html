@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('QR code')}"></head>
+<body class="painel">
+<header class="nao-imprimir" th:replace="~{fragments/layout :: barra(${est.nome}, 'qr')}"></header>
+
+<main class="container centro">
+    <section class="cartao cartaz">
+        <h1 th:text="${est.nome}">Mercado</h1>
+        <p class="cartaz-chamada">Escaneie, pegue sua senha<br>e acompanhe pelo celular</p>
+        <img class="qr" th:src="@{/painel/qr.png}" alt="QR code para entrar na fila" width="320" height="320">
+        <p class="slogan">Sua vez, no seu tempo.</p>
+        <p class="nota url" th:text="${url}">https://</p>
+    </section>
+
+    <p class="nao-imprimir">
+        <button type="button" class="btn btn-primario" onclick="window.print()">Imprimir</button>
+    </p>
+    <p class="nota nao-imprimir">
+        O QR code aponta para o endereço acima. Se o sistema for publicado em outro endereço, defina
+        <code>APP_BASE_URL</code> para que ele saia correto.
+    </p>
+</main>
+</body>
+</html>

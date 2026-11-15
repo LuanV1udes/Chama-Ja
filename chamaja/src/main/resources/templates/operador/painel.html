@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Fila')}"></head>
+<body class="painel" data-eventos="/painel/eventos">
+
+<div class="painel-grid">
+
+    <!-- RF12: fila completa com o status de cada senha -->
+    <main class="painel-fila">
+        <div class="painel-topo">
+            <nav th:replace="~{fragments/layout :: pills('fila')}"></nav>
+
+            <!-- RF13: abrir, pausar ou fechar -->
+            <div class="estado">
+                <span>Fila</span>
+                <div class="segmento" role="group" aria-label="Estado da fila">
+                    <form th:each="e : ${estados}" th:action="@{/painel/estado}" method="post">
+                        <input type="hidden" name="estado" th:value="${e.name()}">
+                        <button type="submit" class="btn" th:text="${e.rotulo}"
+                                th:classappend="${e == est.estadoFila} ? 'ativo'"
+                                th:disabled="${e == est.estadoFila}">Aberta</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="alerta alerta-erro" th:if="${erro}" th:text="${erro}">Erro</div>
+        <div class="alerta alerta-info" th:if="${ok}" th:text="${ok}">Ok</div>
+
+        <section class="cartao">
+            <div class="titulo-linha">
+                <h2>Senhas de hoje</h2>
+                <form th:action="@{/painel/zerar}" method="post"
+                      onsubmit="return confirm('Zerar a fila? Todas as senhas de hoje serão apagadas e a numeração volta ao 001.')">
+                    <button type="submit" class="btn btn-sutil btn-perigo">Zerar fila do dia</button>
+                </form>
+            </div>
+
+            <p class="nota" th:if="${#lists.isEmpty(senhas)}">Nenhuma senha retirada ainda.</p>
+            <div class="tabela-rolavel" th:unless="${#lists.isEmpty(senhas)}">
+                <table>
+                    <thead>
+                    <tr><th>Senha</th><th>Cliente</th><th>Entrada</th><th style="text-align:right">Status</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="s : ${senhas}" th:classappend="${s.status.name() == 'CHAMADA'} ? 'linha-chamada'">
+                        <td class="num" th:text="${s.numeroFormatado}">001</td>
+                        <td th:text="${s.nomeCliente}">Nome</td>
+                        <td class="nota" th:text="${s.entradaHora}">08:00</td>
+                        <td style="text-align:right">
+                            <span class="selo" th:classappend="'selo-' + ${#strings.toLowerCase(s.status.name())}"
+                                  th:text="${s.status.rotulo}">Aguardando</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- RF10 e RF11: controle da senha atual, na coluna escura à direita -->
+    <aside class="controle" aria-label="Controle da fila">
+        <div class="controle-topo">
+            <strong>Chama Já</strong>
+            <span th:text="${est.nome}">Mercado</span>
+        </div>
+
+        <span class="rotulo">Chamando agora</span>
+        <p class="controle-num" th:text="${atual != null} ? ${atual.numeroFormatado} : '---'">---</p>
+        <p class="controle-nome" th:text="${atual != null} ? ${atual.nomeCliente} : 'Ninguém em atendimento'">Nome</p>
+
+        <form th:action="@{/painel/chamar}" method="post" class="controle-chamar">
+            <button type="submit" class="btn btn-claro"
+                    th:disabled="${aguardando == 0 or est.estadoFila.name() == 'FECHADA'}">Chamar próxima</button>
+        </form>
+        <p class="controle-contagem" th:text="${aguardando} + ' aguardando'">5 aguardando</p>
+
+        <div class="controle-acoes">
+            <form th:action="@{/painel/repetir}" method="post">
+                <button type="submit" class="btn btn-contorno" th:disabled="${atual == null}">Repetir</button>
+            </form>
+            <form th:action="@{/painel/pular}" method="post">
+                <button type="submit" class="btn btn-contorno" th:disabled="${atual == null}">Pular</button>
+            </form>
+            <form th:action="@{/painel/finalizar}" method="post">
+                <button type="submit" class="btn btn-contorno" th:disabled="${atual == null}">Finalizar</button>
+            </form>
+        </div>
+
+        <form th:action="@{/logout}" method="post" class="controle-sair">
+            <button type="submit" class="btn btn-quieto">Sair do painel</button>
+        </form>
+    </aside>
+</div>
+
+<script th:src="@{/js/painel.js}"></script>
+</body>
+</html>

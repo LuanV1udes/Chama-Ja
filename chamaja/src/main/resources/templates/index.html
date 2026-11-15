@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Início')}"></head>
+<body class="cliente">
+<main class="container centro">
+    <h1 class="marca">Chama Já</h1>
+    <p class="slogan">Sua vez, no seu tempo.</p>
+    <p>Para pegar uma senha, escaneie o QR code na entrada do estabelecimento.</p>
+    <p><a class="btn btn-sutil" th:href="@{/login}">Sou operador</a></p>
+</main>
+</body>
+</html>

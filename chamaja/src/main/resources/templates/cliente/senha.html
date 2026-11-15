@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Minha senha')}"></head>
+<body class="cliente"
+      th:attr="data-token=${senha.token},data-codigo=${senha.estabelecimento.codigoQr}">
+
+<!-- Faixa de destaque com o número da senha -->
+<header class="hero">
+    <div class="hero-in">
+        <div class="hero-topo">
+            <strong>Chama Já</strong>
+            <span th:text="${senha.estabelecimento.nome}">Mercado</span>
+        </div>
+        <p class="hero-ola">Olá, <span th:text="${senha.nomeCliente}">Pedro</span>. Sua senha é</p>
+        <p class="hero-numero" id="numero" th:text="${senha.numeroFormatado}">004</p>
+    </div>
+</header>
+
+<main class="container sobre-hero">
+    <!-- RF03 e RF04 -->
+    <section class="cartao elevado info" id="info">
+        <div><span class="rotulo">Posição</span><strong id="posicao">—</strong></div>
+        <div><span class="rotulo">À frente</span><strong id="afrente">—</strong></div>
+        <div><span class="rotulo">Chamando</span><strong id="atual">---</strong></div>
+    </section>
+
+    <div class="alerta alerta-erro" th:if="${erro}" th:text="${erro}">Erro</div>
+
+    <!-- RF06: é a vez do cliente -->
+    <div class="alerta alerta-chamada" id="aviso-chamada" role="alert" hidden>
+        <strong>É a sua vez!</strong> Dirija-se ao atendimento.
+    </div>
+
+    <!-- RF05: faltam até 3 números -->
+    <div class="alerta alerta-proximo" id="aviso-proximo" role="alert" hidden>
+        <strong>Sua vez está chegando!</strong> Faltam poucos números. Volte para perto do atendimento.
+    </div>
+
+    <div class="alerta alerta-info" id="aviso-final" hidden></div>
+
+    <div class="alerta alerta-info" id="aviso-pausada" hidden>
+        A fila está pausada, mas as senhas já retiradas continuam sendo chamadas.
+    </div>
+
+    <!-- RF08 -->
+    <section class="promocoes" id="promocoes" hidden>
+        <h2>Enquanto você espera</h2>
+        <ul id="lista-promocoes"></ul>
+    </section>
+
+    <!-- RF07 -->
+    <form th:action="@{/senha/{t}/sair(t=${senha.token})}" method="post" id="form-sair"
+          onsubmit="return confirm('Tem certeza que quer sair da fila?')">
+        <button type="submit" class="btn btn-sutil">Sair da fila</button>
+    </form>
+
+    <p id="nova" class="centro" hidden>
+        <a class="btn btn-primario" th:href="@{/q/{c}(c=${senha.estabelecimento.codigoQr})}">Pegar nova senha</a>
+    </p>
+</main>
+<script th:src="@{/js/senha.js}"></script>
+</body>
+</html>

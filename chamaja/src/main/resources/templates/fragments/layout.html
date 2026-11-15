@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#254b4f">
+    <title th:text="${titulo} + ' · Chama Já'">Chama Já</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<!-- Abas do painel, em pílulas -->
+<nav class="pills" aria-label="Painel" th:fragment="pills(ativo)">
+    <a th:href="@{/painel}" th:classappend="${ativo == 'fila'} ? 'ativo'" th:attr="aria-current=${ativo == 'fila' ? 'page' : null}">Fila</a>
+    <a th:href="@{/painel/promocoes}" th:classappend="${ativo == 'promocoes'} ? 'ativo'" th:attr="aria-current=${ativo == 'promocoes' ? 'page' : null}">Promoções</a>
+    <a th:href="@{/painel/qr}" th:classappend="${ativo == 'qr'} ? 'ativo'" th:attr="aria-current=${ativo == 'qr' ? 'page' : null}">QR code</a>
+</nav>
+
+<!-- Barra do topo das telas de promoções e QR code -->
+<header class="topo" th:fragment="barra(nome, ativo)">
+    <div class="topo-marca">
+        <strong>Chama Já</strong>
+        <span th:text="${nome}">Estabelecimento</span>
+    </div>
+    <nav class="pills" aria-label="Painel">
+        <a th:href="@{/painel}" th:classappend="${ativo == 'fila'} ? 'ativo'">Fila</a>
+        <a th:href="@{/painel/promocoes}" th:classappend="${ativo == 'promocoes'} ? 'ativo'">Promoções</a>
+        <a th:href="@{/painel/qr}" th:classappend="${ativo == 'qr'} ? 'ativo'">QR code</a>
+    </nav>
+    <form th:action="@{/logout}" method="post" class="topo-sair">
+        <button type="submit" class="btn btn-sutil">Sair</button>
+    </form>
+</header>
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Entrar')}"></head>
+<body class="cliente">
+<main class="container">
+    <h1 class="marca">Chama Já</h1>
+    <p class="slogan">Painel do operador</p>
+
+    <div class="alerta alerta-erro" th:if="${param.error}">Usuário ou senha inválidos.</div>
+    <div class="alerta alerta-info" th:if="${param.saiu}">Você saiu do painel.</div>
+
+    <form th:action="@{/login}" method="post" class="cartao form">
+        <label for="username">Usuário</label>
+        <input id="username" name="username" type="text" autocomplete="username" autofocus required>
+
+        <label for="password">Senha</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+        <button type="submit" class="btn btn-primario">Entrar</button>
+    </form>
+</main>
+</body>
+</html>

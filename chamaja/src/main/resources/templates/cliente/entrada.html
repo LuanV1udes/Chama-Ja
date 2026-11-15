@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${est.nome})}"></head>
+<body class="cliente">
+
+<header class="hero">
+    <div class="hero-in">
+        <div class="hero-topo">
+            <strong>Chama Já</strong>
+            <span th:text="${est.nome}">Mercado</span>
+        </div>
+        <h1 class="hero-titulo">Sua vez,<br>no seu tempo.</h1>
+        <p class="hero-sub">Pegue sua senha e acompanhe pelo celular.</p>
+    </div>
+</header>
+
+<main class="container sobre-hero">
+    <div class="alerta alerta-erro" th:if="${erro}" th:text="${erro}">Erro</div>
+
+    <!-- RF02 / RNF01: nome e um toque -->
+    <form th:if="${est.estadoFila.name() == 'ABERTA'}"
+          th:action="@{/q/{codigo}/senha(codigo=${est.codigoQr})}" method="post" class="cartao elevado form">
+        <label for="nome">Seu nome</label>
+        <input id="nome" name="nome" type="text" maxlength="60" autocomplete="given-name" placeholder="Como devemos te chamar?" autofocus required>
+        <button type="submit" class="btn btn-primario btn-grande">Pegar minha senha</button>
+    </form>
+
+    <div class="cartao elevado" th:unless="${est.estadoFila.name() == 'ABERTA'}">
+        <p><strong>A fila não está aceitando novas senhas agora.</strong></p>
+        <p th:if="${est.estadoFila.name() == 'PAUSADA'}">Ela foi pausada pelo atendimento. Tente de novo daqui a pouco.</p>
+        <p th:if="${est.estadoFila.name() == 'FECHADA'}">A fila está fechada no momento.</p>
+    </div>
+
+    <p class="nota centro">Guardamos só o seu nome, e ele é apagado ao fim do dia.</p>
+</main>
+</body>
+</html>
