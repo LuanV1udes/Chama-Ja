@@ -2,6 +2,7 @@ package br.fatec.chamaja.web;
 
 import br.fatec.chamaja.model.Estabelecimento;
 import br.fatec.chamaja.model.Senha;
+import br.fatec.chamaja.service.AvisosPushService;
 import br.fatec.chamaja.service.EstadoSenha;
 import br.fatec.chamaja.service.FilaException;
 import br.fatec.chamaja.service.FilaService;
@@ -44,11 +45,13 @@ public class ClienteController {
     private final FilaService fila;
     private final SseHub sse;
     private final QrAcessoService acesso;
+    private final AvisosPushService push;
 
-    public ClienteController(FilaService fila, SseHub sse, QrAcessoService acesso) {
+    public ClienteController(FilaService fila, SseHub sse, QrAcessoService acesso, AvisosPushService push) {
         this.fila = fila;
         this.sse = sse;
         this.acesso = acesso;
+        this.push = push;
     }
 
     /**
@@ -118,6 +121,9 @@ public class ClienteController {
         return fila.buscarSenha(token)
                 .map(senha -> {
                     model.addAttribute("senha", senha);
+                    // Web Push: a chave pública só vai à página se o servidor tem o recurso ligado.
+                    model.addAttribute("pushChave", push.chavePublica());
+                    model.addAttribute("manifesto", "/senha/" + token + "/manifest.webmanifest");
                     return "cliente/senha";
                 })
                 .orElseGet(() -> {

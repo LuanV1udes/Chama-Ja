@@ -3,7 +3,7 @@
 Fila virtual: o cliente escaneia o QR code, pega a senha no celular e acompanha a vez.
 **"Sua vez, no seu tempo."** Documentação completa na pasta acima: `Chama Já — Documentação Inicial.md`.
 
-Java 21 · Spring Boot 3.4 · Thymeleaf · Spring Security · JPA · Flyway · PostgreSQL (Supabase) · SSE · ZXing
+Java 21 · Spring Boot 3.4 · Thymeleaf · Spring Security · JPA · Flyway · PostgreSQL (Supabase) · SSE · Web Push · ZXing
 
 ## Rodar localmente (sem PostgreSQL)
 
@@ -53,6 +53,38 @@ não sirva para pegar senha de casa.
 
 ---
 
+## Avisos no celular (Web Push)
+
+Depois de pegar a senha, o cliente vê uma mensagem animada ("Quer ser avisado?") e, se tocar em **Permitir
+notificações**, recebe um aviso no celular **mesmo com a tela bloqueada**: quando faltarem até 3 números, quando a
+senha for chamada e quando a chamada for repetida. Não precisa de aplicativo nem do telefone do cliente.
+
+**Ligar o recurso:** gere um par de chaves VAPID **uma vez** e guarde-as como variáveis de ambiente
+(`VAPID_PUBLIC` e `VAPID_PRIVATE`). Sem elas, o recurso fica desligado e a tela nem oferece a opção.
+
+```bash
+node -e "const c=require('crypto');const k=c.generateKeyPairSync('ec',{namedCurve:'prime256v1'}).privateKey.export({format:'jwk'});console.log('VAPID_PUBLIC='+Buffer.concat([Buffer.from([4]),Buffer.from(k.x,'base64url'),Buffer.from(k.y,'base64url')]).toString('base64url'));console.log('VAPID_PRIVATE='+k.d)"
+```
+
+- **A chave privada é segredo:** não vai para o Git. Na Railway, coloque as duas em *Variables*.
+- Se trocar as chaves, as inscrições antigas deixam de valer; cada cliente é reinscrito sozinho na próxima vez que
+  abrir a tela da senha.
+- **Segurança:** o servidor envia requisições para o endereço que o navegador do cliente informa, então só aceita
+  endereços HTTPS dos serviços de push (Google, Mozilla, Apple e Microsoft). Isso impede que alguém use o envio para
+  atacar a rede interna (SSRF).
+- **Privacidade:** a inscrição fica ligada à senha e é apagada quando ela termina, ao zerar a fila e no reset diário.
+
+**Limites que o grupo deve conhecer**
+
+| Situação | O que acontece |
+| --- | --- |
+| Cliente toca em "Agora não" ou bloqueia as notificações | Continua sendo avisado só na tela, com a página aberta |
+| **iPhone** | O Safari só recebe push com o site na Tela de Início. A tela mostra a instrução ("Compartilhar" → "Adicionar à Tela de Início"); o ícone abre direto na senha do cliente |
+| Página da senha aberta e visível | A própria página avisa (tela, vibração e som); o push não duplica |
+| Celular sem internet | O aviso chega quando a conexão voltar, se ainda estiver dentro da validade (2 minutos para "é a sua vez") |
+
+---
+
 ## Publicar: Supabase (banco) + Railway (aplicação)
 
 ### 1. Supabase: criar o banco
@@ -91,6 +123,8 @@ REST aberta; as tabelas também nascem com RLS ligado e sem políticas.
 | `SEED_NOME` | nome do estabelecimento (padrão `Mercado Demo`) | não |
 | `APP_BASE_URL` | `https://seu-app.up.railway.app` (endereço do QR code) | sim, depois de gerar o domínio |
 | `QR_SEGREDO` | texto longo e aleatório que assina os códigos do QR rotativo (em branco = gera um a cada início) | recomendada |
+| `VAPID_PUBLIC` / `VAPID_PRIVATE` | par de chaves do Web Push (veja "Avisos no celular"); sem elas o recurso fica desligado | para os avisos no celular |
+| `VAPID_ASSUNTO` | identifica o servidor ao serviço de push (padrão: o `APP_BASE_URL`). Use o endereço do site, nunca um e-mail pessoal | não |
 | `DB_POOL_SIZE` | conexões do pool (padrão `5`) | não |
 
 `SPRING_PROFILES_ACTIVE=prod`, o horário de Brasília e a porta já vêm no `Dockerfile` e na Railway.
@@ -140,8 +174,9 @@ Dockerfile, railway.toml   build e deploy na Railway
 ## Decisões e limitações do MVP
 
 - Uma fila por estabelecimento; um operador por estabelecimento.
-- Os avisos (3 números e "é a sua vez") aparecem com a página aberta, por tela, vibração e som.
-  Notificação com o aparelho bloqueado (push/WhatsApp) fica para uma versão futura.
+- Os avisos (3 números e "é a sua vez") aparecem na tela, com vibração e som, enquanto a página está aberta. Com
+  o aparelho bloqueado, só chegam se o cliente ativou os avisos no celular (Web Push, acima). WhatsApp e SMS ficam
+  para uma versão futura.
 - "Uma senha por aparelho" usa cookie: protege contra duplo clique, não contra quem apaga o cookie. Quem
   de fato impede pegar senha de longe é o QR rotativo com permissão de uso único.
 - O QR rotativo não impede que alguém **dentro do local** repasse o QR ao vivo a um amigo (que o usaria em até

@@ -26,6 +26,10 @@ public interface SenhaRepository extends JpaRepository<Senha, Long> {
 
     long countByEstabelecimentoIdAndStatus(Long estabelecimentoId, StatusSenha status);
 
+    /** Aguardando com número até o limite que ainda não receberam o push de "sua vez está chegando". */
+    List<Senha> findByEstabelecimentoIdAndStatusAndNumeroLessThanEqualAndPushProximidadeEnviadoFalseOrderByNumeroAsc(
+            Long estabelecimentoId, StatusSenha status, int numeroMaximo);
+
     /** Quantas aguardando estão antes do número informado (base do cálculo de posição). */
     long countByEstabelecimentoIdAndStatusAndNumeroLessThan(Long estabelecimentoId, StatusSenha status, int numero);
 

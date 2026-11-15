@@ -9,6 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="icon" type="image/png" th:href="@{/img/icone-192.png}">
+    <link rel="apple-touch-icon" th:href="@{/img/icone-192.png}">
+    <!-- Só na tela da senha: abre o ícone instalado direto na senha do cliente (iPhone). -->
+    <link rel="manifest" th:if="${manifesto != null}" th:href="${manifesto}">
 </head>
 <body>
 

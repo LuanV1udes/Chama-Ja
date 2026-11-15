@@ -92,6 +92,33 @@ class MigracaoPostgresTest {
     }
 
     @Test
+    void aInscricaoDePushTemRlsEApagaJuntoComASenha() {
+        Boolean rls = jdbc.queryForObject("""
+                select c.relrowsecurity from pg_class c
+                join pg_namespace n on n.oid = c.relnamespace
+                where n.nspname = 'chamaja' and c.relname = 'inscricao_push'
+                """, Boolean.class);
+        assertThat(rls).isTrue();
+
+        jdbc.update("insert into chamaja.estabelecimento (nome, codigo_qr, codigo_tela, estado_fila, senha_atual, ultimo_numero) "
+                + "values ('Cascata', 'casc1', 'tela-casc-1', 'ABERTA', 0, 0)");
+        Long estId = jdbc.queryForObject("select id from chamaja.estabelecimento where codigo_qr = 'casc1'", Long.class);
+        jdbc.update("insert into chamaja.senha (estabelecimento_id, token, numero, nome_cliente, status, entrada, "
+                + "aviso_proximidade_enviado, push_proximidade_enviado) "
+                + "values (?, 'tok-casc', 1, 'Ana', 'AGUARDANDO', now(), false, false)", estId);
+        Long senhaId = jdbc.queryForObject("select id from chamaja.senha where token = 'tok-casc'", Long.class);
+        jdbc.update("insert into chamaja.inscricao_push (senha_id, endpoint, p256dh, auth, criada_em) "
+                + "values (?, 'https://fcm.googleapis.com/fcm/send/cascata', 'a', 'b', now())", senhaId);
+        assertThat(jdbc.queryForObject("select count(*) from chamaja.inscricao_push where senha_id = ?", Integer.class, senhaId))
+                .isEqualTo(1);
+
+        jdbc.update("delete from chamaja.senha where id = ?", senhaId);   // o que "zerar a fila" e o reset diário fazem
+
+        assertThat(jdbc.queryForObject("select count(*) from chamaja.inscricao_push where senha_id = ?", Integer.class, senhaId))
+                .isZero();
+    }
+
+    @Test
     void oEstabelecimentoDoSeedTemCodigoDaTela() {
         String codigoTela = jdbc.queryForObject(
                 "select codigo_tela from chamaja.estabelecimento order by id limit 1", String.class);

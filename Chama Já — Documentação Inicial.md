@@ -34,13 +34,14 @@ O MVP cobre o ciclo completo de uma fila: entrar, esperar, ser avisado, ser cham
 - Acompanhamento da posição na fila em tempo real
 - Aviso na tela do cliente quando faltarem até 3 números para a vez dele
 - Aviso na tela do cliente quando a senha for chamada
+- Avisos no celular por Web Push (notificação com a tela bloqueada), que o cliente ativa com um toque depois de pegar a senha
 - Painel do operador para chamar, repetir, pular e finalizar senhas
 - Cadastro, edição e remoção de promoções
 - Exibição das promoções ativas para o cliente
 
 **Fora do escopo (versões futuras)**
 
-- Notificação push ou WhatsApp com o aparelho bloqueado (no MVP os avisos aparecem na tela aberta)
+- Notificação por WhatsApp ou SMS (o aviso com a tela bloqueada é feito por Web Push, que é grátis e não exige o telefone do cliente)
 - Mais de um estabelecimento por conta (multiloja)
 - Mais de uma fila por estabelecimento (setores com filas separadas)
 - Relatórios e métricas de tempo de espera
@@ -57,8 +58,8 @@ Cada requisito tem um código para facilitar a referência nos testes e na apres
 | RF02 | Cliente | Informar o nome e retirar uma senha |
 | RF03 | Cliente | Ver a senha, a posição na fila e quantas pessoas estão à frente |
 | RF04 | Cliente | Ver a senha atual sendo chamada |
-| RF05 | Cliente | Ser avisado na tela quando faltarem até 3 números para a sua senha (faixa de aviso na tela, com vibração e som uma única vez) |
-| RF06 | Cliente | Ser avisado na tela quando for chamado |
+| RF05 | Cliente | Ser avisado quando faltarem até 3 números para a sua senha: faixa de aviso na tela (com vibração e som uma única vez) e, se ele ativou os avisos no celular, também por notificação, mesmo com a tela bloqueada |
+| RF06 | Cliente | Ser avisado quando for chamado (ou quando a chamada for repetida), na tela e, se ativou os avisos no celular, por notificação |
 | RF07 | Cliente | Sair da fila antes de ser chamado |
 | RF08 | Cliente | Ver a lista de promoções ativas enquanto espera |
 | RF09 | Operador | Fazer login para acessar o painel |
@@ -79,6 +80,7 @@ Cada requisito tem um código para facilitar a referência nos testes e na apres
 - **Estados da fila (RF13).** *Aberta*: aceita novas senhas e chama normalmente. *Pausada*: não aceita novas senhas, mas o operador continua chamando as já existentes. *Fechada*: não aceita novas senhas e não chama.
 - **Numeração.** As senhas são sequenciais, com 3 dígitos (ex.: 014), e a contagem reinicia quando a fila do dia é zerada.
 - **QR code rotativo (RF01 e RF16).** O QR exibido na tela de entrada carrega um código assinado pelo servidor que muda a cada minuto e vale só para o minuto atual e o anterior. Uma foto do QR deixa de funcionar em poucos minutos, então não dá para pegar senha de casa com ela. Ao escanear um código válido, o aparelho recebe uma permissão de 10 minutos e de **uso único**: dá tempo de digitar o nome, mas não de pegar várias senhas em sequência. Sem escanear, a página só pede para escanear o QR na entrada.
+- **Avisos no celular (Web Push).** Assim que o cliente pega a senha, aparece uma mensagem animada: "Quer ser avisado?" com **Permitir notificações** e **Agora não**. Se ele permite, o navegador se inscreve no serviço de push e a inscrição é ligada à senha dele. O servidor envia uma notificação quando faltam até 3 números (uma vez só), quando a senha é chamada e quando o operador repete a chamada. Se a página do cliente está aberta e visível, ela mesma avisa e o push não duplica. Quem já permitiu antes não é perguntado de novo. A inscrição some quando a senha termina (finalizada, pulada, cancelada), ao zerar a fila e no reset diário. Por segurança, o servidor só envia para endereços HTTPS dos serviços de push dos navegadores (Google, Mozilla, Apple e Microsoft), para que ninguém use o envio contra a rede interna.
 - **Equipamentos sugeridos.** *Tablet externo (porta):* abre o link secreto da tela de entrada e só mostra o QR (sem login, sem acesso ao painel). *Tablet interno (atendimento):* painel do operador. *Reserva (celular ou computador):* também abre o painel, ao mesmo tempo e com o mesmo login, e pode abrir o link da tela no lugar do tablet externo. Se o link da tela vazar, o operador gera outro no painel e o antigo deixa de funcionar.
 
 ## 5. Requisitos não funcionais
@@ -90,7 +92,7 @@ Cada requisito tem um código para facilitar a referência nos testes e na apres
 | RNF03 | Desempenho | A posição na fila e os avisos atualizam em até 5 segundos |
 | RNF04 | Responsividade | Tela do cliente pensada primeiro para celular; painel do operador para tablet ou computador |
 | RNF05 | Segurança | Painel do operador protegido por login; senhas armazenadas com hash (BCrypt); endpoints públicos do cliente com limite de requisições |
-| RNF06 | Privacidade | Coletar o mínimo de dados do cliente (apenas nome) e apagá-los ao fim do dia, por rotina agendada ou ao zerar a fila |
+| RNF06 | Privacidade | Coletar o mínimo de dados do cliente (apenas nome) e apagá-los ao fim do dia, por rotina agendada ou ao zerar a fila. A inscrição de notificações do aparelho é apagada junto com a senha, assim que ela termina |
 | RNF07 | Disponibilidade | Sistema deve manter a fila ao recarregar a página: a senha fica salva no aparelho por meio de um identificador único e não adivinhável (UUID) |
 
 ## 6. Fluxo principal
@@ -146,6 +148,7 @@ Sugestão de pilha simples para um projeto acadêmico; a equipe pode trocar qual
 | Interface | HTML, CSS e JavaScript servidos pelo Spring (ex.: Thymeleaf), responsivos | Sem instalação: o cliente só abre o link do QR code |
 | QR code | Biblioteca ZXing | Gera o código que aponta para a página do estabelecimento |
 | Migrações | Flyway | O schema do banco é versionado em arquivos SQL; o Hibernate só confere se bate |
+| Avisos no celular | Web Push (VAPID) com a biblioteca `web-push` e um service worker | Notificação com a tela bloqueada, sem app e sem coletar o telefone; funciona em Chrome, Edge, Firefox e Safari (iPhone com o site na Tela de Início) |
 | Rotina diária | `@Scheduled` do Spring | Apaga os dados dos clientes e reinicia a numeração ao fim do dia |
 | Hospedagem | Railway, com deploy a partir do GitHub | Projeto já usado pela equipe; link público para a demonstração |
 
@@ -157,7 +160,7 @@ Com Java, o login e a atualização em tempo real são implementados no próprio
 | --- | --- |
 | Cliente pega senha sem estar no local | QR code rotativo numa tela na entrada (o código muda a cada minuto), permissão de uso único ao escanear, uma senha ativa por aparelho e limite de requisições por IP. **Limitação conhecida:** alguém dentro do local pode repassar o QR ao vivo a um amigo, que o usa em até ~2 minutos; sem hardware de presença (como GPS confiável ou Bluetooth), isso não se elimina por completo |
 | Cliente sem celular ou sem internet | Manter a senha impressa ou o atendimento tradicional como alternativa |
-| Cliente fecha a tela e perde o aviso de proximidade | No MVP os avisos só aparecem com a página aberta; notificação push fica para uma versão futura |
+| Cliente bloqueia a tela e perde o aviso | Web Push: depois de pegar a senha, uma mensagem animada convida a permitir notificações; o aviso chega mesmo com a tela bloqueada. **Limites:** quem recusa a permissão continua só com o aviso na tela; no iPhone só funciona depois de "Adicionar à Tela de Início" (a tela mostra a instrução) |
 | Operador esquece de atualizar a fila | Botão único "Chamar próxima" e aviso de senha chamada há muito tempo sem finalizar |
 | Dados pessoais do cliente | Pedir só o nome e apagar as senhas ao fim do dia (RNF06) |
 | Acesso indevido à senha de outro cliente | Identificar a senha por UUID, nunca por id sequencial (RNF07) |

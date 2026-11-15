@@ -104,6 +104,9 @@
     document.title = chamada ? '🔔 É a sua vez! · Chama Já'
       : (aguardando && e.proximo) ? '⏳ Sua vez está chegando · Chama Já'
       : tituloOriginal;
+
+    // Outros scripts (como o dos avisos no celular) reagem ao estado da senha.
+    document.dispatchEvent(new CustomEvent('chamaja:estado', { detail: e }));
   }
 
   function atualizar() {

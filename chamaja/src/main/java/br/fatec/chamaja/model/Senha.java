@@ -58,6 +58,10 @@ public class Senha {
     @Column(name = "aviso_proximidade_enviado", nullable = false)
     private boolean avisoProximidadeEnviado;
 
+    /** Já enviamos o push de "sua vez está chegando"? (Controle separado do aviso na tela.) */
+    @Column(name = "push_proximidade_enviado", nullable = false)
+    private boolean pushProximidadeEnviado;
+
     protected Senha() {
     }
 
@@ -123,5 +127,13 @@ public class Senha {
 
     public void setAvisoProximidadeEnviado(boolean avisoProximidadeEnviado) {
         this.avisoProximidadeEnviado = avisoProximidadeEnviado;
+    }
+
+    public boolean isPushProximidadeEnviado() {
+        return pushProximidadeEnviado;
+    }
+
+    public void setPushProximidadeEnviado(boolean pushProximidadeEnviado) {
+        this.pushProximidadeEnviado = pushProximidadeEnviado;
     }
 }

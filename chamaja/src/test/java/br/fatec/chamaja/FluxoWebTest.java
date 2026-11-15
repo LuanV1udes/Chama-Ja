@@ -233,6 +233,22 @@ class FluxoWebTest {
                 .andExpect(content().string(containsString("Ana")));
     }
 
+    // ------------------------------------------------------------------ push desligado (sem chaves VAPID)
+
+    @Test
+    void semChavesVapidAPaginaNaoOfereceOPushENemAceitaInscricao() throws Exception {
+        String token = retirarSenha("Ana");
+
+        mvc.perform(get("/senha/" + token))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("data-push-chave"))));
+
+        mvc.perform(post("/senha/" + token + "/push").with(csrf())
+                        .contentType("application/json")
+                        .content("{\"endpoint\":\"https://fcm.googleapis.com/x\",\"keys\":{\"p256dh\":\"a\",\"auth\":\"b\"}}"))
+                .andExpect(status().isNotFound());
+    }
+
     // ------------------------------------------------------------------ tela de entrada
 
     @Test

@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Minha senha')}"></head>
 <body class="cliente"
-      th:attr="data-token=${senha.token},data-codigo=${senha.estabelecimento.codigoQr}">
+      th:attr="data-token=${senha.token},data-codigo=${senha.estabelecimento.codigoQr},data-push-chave=${pushChave}">
 
 <!-- Faixa de destaque com o número da senha -->
 <header class="hero">
@@ -23,6 +23,12 @@
         <div><span class="rotulo">À frente</span><strong id="afrente">—</strong></div>
         <div><span class="rotulo">Chamando</span><strong id="atual">---</strong></div>
     </section>
+
+    <p class="push-ativo" id="push-ativo" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        Avisos no celular ativados
+    </p>
 
     <div class="alerta alerta-erro" th:if="${erro}" th:text="${erro}">Erro</div>
 
@@ -58,6 +64,77 @@
         <a class="btn btn-primario" th:href="@{/q/{c}(c=${senha.estabelecimento.codigoQr})}">Pegar nova senha</a>
     </p>
 </main>
+<!-- Avisos no celular (Web Push): mensagem animada que sobe do rodapé depois de pegar a senha -->
+<section id="push-card" class="push-card" role="region" aria-label="Avisos no celular" aria-live="polite" hidden>
+
+    <div data-estado="pedir" hidden>
+        <div class="push-cabeca">
+            <span class="push-sino" aria-hidden="true">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+            </span>
+            <div>
+                <h2 class="push-titulo">Quer ser avisado?</h2>
+                <p>Receba um aviso no celular quando a sua vez estiver chegando, mesmo com a tela bloqueada.</p>
+            </div>
+        </div>
+        <div class="push-acoes">
+            <button type="button" id="push-permitir" class="btn btn-primario btn-grande">Permitir notificações</button>
+            <button type="button" id="push-depois" class="btn btn-sutil">Agora não</button>
+        </div>
+    </div>
+
+    <div data-estado="ok" hidden>
+        <div class="push-cabeca">
+            <span class="push-sino push-sino-ok" aria-hidden="true">
+                <svg class="push-check" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" pathLength="1"/></svg>
+            </span>
+            <div>
+                <h2 class="push-titulo">Pronto, vamos te avisar!</h2>
+                <p>Você recebe um aviso quando faltarem poucos números e quando for a sua vez.</p>
+            </div>
+        </div>
+    </div>
+
+    <div data-estado="negado" hidden>
+        <div class="push-cabeca">
+            <div>
+                <h2 class="push-titulo">Avisos bloqueados</h2>
+                <p>Tudo bem: você continua sendo avisado aqui, nesta tela. Se mudar de ideia, libere as notificações
+                   deste site nas configurações do navegador.</p>
+            </div>
+        </div>
+        <div class="push-acoes"><button type="button" class="btn btn-primario btn-grande" data-fechar>Entendi</button></div>
+    </div>
+
+    <div data-estado="erro" hidden>
+        <div class="push-cabeca">
+            <div>
+                <h2 class="push-titulo">Não foi possível ativar</h2>
+                <p>Você continua sendo avisado aqui, nesta tela. Tente de novo mais tarde.</p>
+            </div>
+        </div>
+        <div class="push-acoes"><button type="button" class="btn btn-primario btn-grande" data-fechar>Entendi</button></div>
+    </div>
+
+    <div data-estado="ios" hidden>
+        <div class="push-cabeca">
+            <span class="push-sino" aria-hidden="true">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>
+            </span>
+            <div>
+                <h2 class="push-titulo">Avisos no iPhone</h2>
+                <p>Para ser avisado com a tela bloqueada, toque em <strong>Compartilhar</strong> e depois em
+                   <strong>Adicionar à Tela de Início</strong>. Abra o Chama Já por esse ícone: sua senha continua lá.</p>
+            </div>
+        </div>
+        <div class="push-acoes"><button type="button" class="btn btn-primario btn-grande" data-fechar>Entendi</button></div>
+    </div>
+</section>
+
 <script th:src="@{/js/senha.js}"></script>
+<script th:src="@{/js/push.js}"></script>
 </body>
 </html>

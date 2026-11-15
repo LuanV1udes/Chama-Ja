@@ -6,6 +6,7 @@ import br.fatec.chamaja.model.Promocao;
 import br.fatec.chamaja.model.Senha;
 import br.fatec.chamaja.model.StatusSenha;
 import br.fatec.chamaja.repository.EstabelecimentoRepository;
+import br.fatec.chamaja.repository.InscricaoPushRepository;
 import br.fatec.chamaja.repository.PromocaoRepository;
 import br.fatec.chamaja.repository.SenhaRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -33,15 +34,18 @@ public class FilaService {
     private final EstabelecimentoRepository estabelecimentos;
     private final SenhaRepository senhas;
     private final PromocaoRepository promocoes;
+    private final InscricaoPushRepository inscricoes;
     private final ApplicationEventPublisher eventos;
 
     public FilaService(EstabelecimentoRepository estabelecimentos,
                        SenhaRepository senhas,
                        PromocaoRepository promocoes,
+                       InscricaoPushRepository inscricoes,
                        ApplicationEventPublisher eventos) {
         this.estabelecimentos = estabelecimentos;
         this.senhas = senhas;
         this.promocoes = promocoes;
+        this.inscricoes = inscricoes;
         this.eventos = eventos;
     }
 
@@ -113,7 +117,7 @@ public class FilaService {
         if (senha.getStatus() != StatusSenha.AGUARDANDO) {
             throw new FilaException("Só é possível sair da fila antes de ser chamado.");
         }
-        senha.setStatus(StatusSenha.CANCELADA);
+        encerrar(senha, StatusSenha.CANCELADA);
         avisarTelas(senha.getEstabelecimento().getId());
     }
 
@@ -188,12 +192,15 @@ public class FilaService {
                 .orElseThrow(() -> new FilaException("Não há senhas aguardando."));
 
         senhas.findByEstabelecimentoIdAndStatus(est.getId(), StatusSenha.CHAMADA)
-                .forEach(anterior -> anterior.setStatus(StatusSenha.FINALIZADA));
+                .forEach(anterior -> encerrar(anterior, StatusSenha.FINALIZADA));
 
         proxima.setStatus(StatusSenha.CHAMADA);
         proxima.setChamadaEm(Instant.now());
         est.setSenhaAtual(proxima.getNumero());
         avisarTelas(est.getId());
+        // Avisos de push (depois do commit): "é a sua vez" para esta senha e "está chegando" para as próximas.
+        eventos.publishEvent(new SenhaChamada(proxima.getId(), false));
+        eventos.publishEvent(new FilaAvancou(est.getId()));
         return proxima;
     }
 
@@ -203,6 +210,7 @@ public class FilaService {
         Senha atual = exigirChamadaAtual(estabelecimentoId);
         atual.setChamadaEm(Instant.now());
         avisarTelas(estabelecimentoId);
+        eventos.publishEvent(new SenhaChamada(atual.getId(), true));
         return atual;
     }
 
@@ -210,7 +218,7 @@ public class FilaService {
     @Transactional
     public Senha pular(Long estabelecimentoId) {
         Senha atual = exigirChamadaAtual(estabelecimentoId);
-        atual.setStatus(StatusSenha.PULADA);
+        encerrar(atual, StatusSenha.PULADA);
         avisarTelas(estabelecimentoId);
         return atual;
     }
@@ -219,7 +227,7 @@ public class FilaService {
     @Transactional
     public Senha finalizar(Long estabelecimentoId) {
         Senha atual = exigirChamadaAtual(estabelecimentoId);
-        atual.setStatus(StatusSenha.FINALIZADA);
+        encerrar(atual, StatusSenha.FINALIZADA);
         avisarTelas(estabelecimentoId);
         return atual;
     }
@@ -274,6 +282,12 @@ public class FilaService {
         travar(estabelecimentoId);
         return chamadaAtual(estabelecimentoId)
                 .orElseThrow(() -> new FilaException("Nenhuma senha está sendo chamada no momento."));
+    }
+
+    /** Encerra a senha (finalizada, pulada ou cancelada) e apaga a inscrição de push do aparelho do cliente. */
+    private void encerrar(Senha senha, StatusSenha novoStatus) {
+        senha.setStatus(novoStatus);
+        inscricoes.deleteBySenhaId(senha.getId());
     }
 
     private void avisarTelas(Long estabelecimentoId) {
