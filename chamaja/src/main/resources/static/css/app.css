@@ -80,6 +80,14 @@ a { color: var(--destaque); }
 .centro { text-align: center; }
 
 .marca { color: var(--destaque); font-size: 1.75rem; font-weight: 700; text-align: center; margin: .25rem 0 0; }
+/* Logo: solta nos fundos claros; sobre a faixa laranja vai numa ficha branca para não sumir */
+.logo-grande { display: block; margin: 0 auto; width: min(220px, 60%); height: auto; }
+.logo-topo { width: 56px; height: auto; flex: none; }
+.logo-ficha { display: inline-flex; background: #ffffff; border-radius: 14px; padding: .3rem .6rem; line-height: 0; }
+.logo-ficha .logo { height: 40px; width: auto; }
+body.tela .logo-ficha { border-radius: 20px; padding: .5rem 1rem; }
+body.tela .logo-ficha .logo { height: clamp(64px, 11vmin, 110px); }
+
 .slogan { text-align: center; color: var(--suave); margin: 0 0 1.5rem; }
 .nota { color: var(--suave); font-size: .875rem; }
 .rotulo { display: block; color: var(--suave); font-size: .8rem; margin-bottom: .1rem; }

@@ -25,6 +25,7 @@
 
 <!-- Barra do topo das telas de promoções e QR code -->
 <header class="topo" th:fragment="barra(nome, ativo)">
+    <img class="logo-topo" th:src="@{/img/logo.png}" width="480" height="283" alt="">
     <div class="topo-marca">
         <strong>Chama Já</strong>
         <span th:text="${nome}">Estabelecimento</span>

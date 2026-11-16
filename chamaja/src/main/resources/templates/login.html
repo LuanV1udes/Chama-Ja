@@ -3,7 +3,7 @@
 <head th:replace="~{fragments/layout :: head('Entrar')}"></head>
 <body class="cliente">
 <main class="container">
-    <h1 class="marca">Chama Já</h1>
+    <h1 class="marca"><img class="logo-grande" th:src="@{/img/logo.png}" width="480" height="283" alt="Chama Já"></h1>
     <p class="slogan">Painel do operador</p>
 
     <div class="alerta alerta-erro" th:if="${param.error}">Usuário ou senha inválidos.</div>
