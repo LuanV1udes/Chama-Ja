@@ -75,8 +75,8 @@ public class PushController {
         manifesto.put("start_url", "/senha/" + token);
         manifesto.put("scope", "/");
         manifesto.put("display", "standalone");
-        manifesto.put("background_color", "#f5f4f0");
-        manifesto.put("theme_color", "#254b4f");
+        manifesto.put("background_color", "#fff8f1");
+        manifesto.put("theme_color", "#d9480f");
         manifesto.put("lang", "pt-BR");
         manifesto.put("icons", List.of(
                 Map.of("src", "/img/icone-192.png", "sizes", "192x192", "type", "image/png"),

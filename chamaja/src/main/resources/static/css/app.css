@@ -1,58 +1,58 @@
 /*
  * Chama Já — estilo (direção A4 "Faixa de Destaque").
- * Fonte Outfit; fundo quente; uma cor de destaque (verde-petróleo escuro) usada em faixas e botões.
+ * Fonte Outfit; fundo quente; uma cor de destaque (laranja da logo) usada em faixas e botões.
  * Estados usam tons terrosos e dessaturados; sem animações chamativas.
  */
 :root {
-  --fundo: #f5f4f0;
+  --fundo: #fff8f1;
   --cartao: #ffffff;
-  --texto: #1f2933;
-  --suave: #5d6770;
-  --borda: #e3e0d8;
-  --linha: #efece5;
+  --texto: #1f1a17;
+  --suave: #6b5d54;
+  --borda: #f0ddcc;
+  --linha: #f6e9dc;
 
-  --primaria: #254b4f;
-  --primaria-hover: #1b3c3f;
-  --primaria-clara: #e7efef;
-  --destaque: #254b4f;          /* cor do texto de destaque sobre fundo claro */
-  --sobre: #f1f7f7;             /* texto sobre a cor primária */
-  --sobre-suave: #c5dadb;
-  --contorno-escuro: #5f8a8d;
+  --primaria: #d9480f;          /* laranja da logo (extremo avermelhado do degradê) */
+  --primaria-hover: #b83a09;
+  --primaria-clara: #ffeadb;
+  --destaque: #c2410c;          /* cor do texto de destaque sobre fundo claro */
+  --sobre: #fff8f1;             /* texto sobre a cor primária */
+  --sobre-suave: #ffd9bf;
+  --contorno-escuro: #ffa763;
 
-  --atencao: #6b4e16;
-  --atencao-fundo: #f6f0e2;
-  --atencao-borda: #cdb27a;
+  --atencao: #7a4e00;           /* âmbar do sino */
+  --atencao-fundo: #fff3d1;
+  --atencao-borda: #f0b429;
 
-  --erro: #8f3a34;
-  --erro-fundo: #f5e5e3;
-  --info: #e7edf2;
+  --erro: #9b2c2c;
+  --erro-fundo: #fbe6e3;
+  --info: #f3ece5;
 
   --raio: 16px;
-  --sombra: 0 8px 24px rgba(31, 41, 51, .08);
+  --sombra: 0 8px 24px rgba(120, 53, 15, .10);
   --fonte: "Outfit", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --fundo: #15191b;
-    --cartao: #1f2528;
-    --texto: #ecebe7;
-    --suave: #9aa3aa;
-    --borda: #32393e;
-    --linha: #2a3135;
+    --fundo: #1a1411;
+    --cartao: #251d18;
+    --texto: #f5ede6;
+    --suave: #b3a398;
+    --borda: #3d2f26;
+    --linha: #31261f;
 
-    --primaria: #2f5f64;
-    --primaria-hover: #3a727a;
-    --primaria-clara: #223437;
-    --destaque: #9cc7ca;
+    --primaria: #e8590c;
+    --primaria-hover: #f26a1f;
+    --primaria-clara: #3a2418;
+    --destaque: #ffb27a;
 
-    --atencao: #e3c685;
-    --atencao-fundo: #2f2819;
-    --atencao-borda: #8a7240;
+    --atencao: #fdbc16;
+    --atencao-fundo: #302312;
+    --atencao-borda: #8a6a1f;
 
-    --erro: #e0a29c;
-    --erro-fundo: #3a2422;
-    --info: #223039;
+    --erro: #f0a8a0;
+    --erro-fundo: #3a2220;
+    --info: #2b221c;
     --sombra: none;
   }
 }
@@ -306,7 +306,7 @@ body.com-push-card .container { padding-bottom: 15rem; }
   border: 0; background: transparent; color: var(--suave);
   min-height: 36px; padding: 0 1rem; font-size: .9rem;
 }
-.segmento .btn.ativo { background: var(--cartao); color: var(--destaque); font-weight: 600; box-shadow: 0 1px 3px rgba(31, 41, 51, .15); }
+.segmento .btn.ativo { background: var(--cartao); color: var(--destaque); font-weight: 600; box-shadow: 0 1px 3px rgba(120, 53, 15, .18); }
 .segmento .btn:disabled { opacity: 1; cursor: default; }
 .segmento .btn:disabled:not(.ativo) { opacity: .4; }
 
@@ -335,7 +335,7 @@ body.com-push-card .container { padding-bottom: 15rem; }
 .controle-acoes { margin-top: 1rem; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; }
 .controle-acoes .btn { width: 100%; min-height: 48px; border-radius: 12px; }
 .controle .controle-sair { margin-top: auto; padding-top: 1.5rem; }
-.controle .btn-claro { background: var(--sobre); color: #1b3c3f; border-color: var(--sobre); }
+.controle .btn-claro { background: var(--sobre); color: #7c2d0a; border-color: var(--sobre); }
 .controle .btn-claro:hover:not(:disabled) { background: #ffffff; }
 .controle .btn-contorno { background: transparent; color: var(--sobre); border-color: var(--contorno-escuro); }
 .controle .btn-contorno:hover:not(:disabled) { border-color: var(--sobre); }
